@@ -163,11 +163,22 @@ ${java.version}
 
 
 
-
-
 ### 5、IDEA设置默认maven
 
 在IDEA中如果在setting中指定maven路径，那么在下一次创建和导入项目时，maven设置会被还原。
 
 解决方法：在IDEA欢迎界面，Configure->Project Defaults->setting->Maven设置maven路径。
+
+
+
+### 6、dependency标签中的scope
+
+主要管理依赖的部署。目前<scope>可以使用5个值： * compile，缺省值，适用于所有阶段，会随着项目一起发布。 
+
+* compile，缺省值，**适用于所有阶段，会随着项目一起发布**。 
+
+* provided，类似compile，期望JDK、容器或使用者会提供这个依赖。如servlet.jar。 
+* runtime，**只在运行时使用**，如JDBC驱动，适用运行和测试阶段。 
+* test，只在测试时使用，用于编译和运行测试代码。**不会随项目发布**。 
+* system，类似provided，**需要显式提供包含依赖的jar**，Maven不会在Repository中查找它。 
 
