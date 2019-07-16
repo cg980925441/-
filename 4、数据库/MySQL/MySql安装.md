@@ -69,7 +69,7 @@
 
 - 8、Navicat连接MySQL 8出现2059错误
 
-  原因：MySQL最新版本采用caching_sha2_password验证，Navicat不支持。
+  原因：MySQL 8.x最新版本采用caching_sha2_password验证，Navicat不支持。
 
   解决：
 
