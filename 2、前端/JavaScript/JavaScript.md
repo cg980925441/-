@@ -70,7 +70,9 @@ s === "Hello";
 
 ~~~ js
 var s = "123456";
+// 字符串转整数
 var num = parseInt(s);
+// 整数转字符串
 s = num + "";
 ~~~
 
