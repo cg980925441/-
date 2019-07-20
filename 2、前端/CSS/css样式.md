@@ -88,3 +88,15 @@ border-radius: 25;
 box-shadow: 10px 10px 5px #888888;
 ~~~
 
+
+
+### 5、变形
+
+缩放变形
+
+~~~ css
+transform: scale(1.1)
+~~~
+
+为了使得变形更加平滑，一般都会加入旋转的效果
+
