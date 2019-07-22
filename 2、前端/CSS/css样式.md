@@ -71,14 +71,63 @@ color:white;
 
 ### 3、形状
 
-#### 1、圆角
+#### 1、圆
 
 ~~~ css
-/* 背景角度 */
-background-radius: 25;
-/* 边框角度 */
-border-radius: 25;
+border-radius: 50%;/*圆*/
+border-radius: 150px 150px 0 0;/*半圆*/
+border-radius: 150px 0 0 0;/*四分之一圆*/
 ~~~
+
+画圆的时候注意两点：
+
+- 只有宽高为正方形时才能画出正圆；
+- 画部分圆时，需要注意缩小宽高；
+
+
+
+#### 2、三角
+
+~~~css
+border-top: 50px solid transparent;
+border-bottom: 50px solid aqua;
+border-left: 50px solid transparent;
+border-right: 50px solid transparent;
+width: 0px;
+height: 0px;
+margin: 50px auto;
+~~~
+
+画三角的时候注意：
+
+- 设置border属性，设置四面边框且宽高为0；
+- 通过设置对面边框边框为0，且两边为透明transparent色；
+
+额，直接把不需要的三面边框设置为透明色就行了。
+
+
+
+#### 3、菱形
+
+~~~ css
+transform: rotate(45deg);
+~~~
+
+通过45度旋转正方形即可得到菱形，注意**角度的单位deg**
+
+
+
+#### 4、平行四边形
+
+~~~css
+transform: skew(-10deg);
+~~~
+
+通过倾斜正方形即可得到平行四边形。倾斜还可以旋转y轴。
+
+
+
+#### 5、五角星
 
 
 
