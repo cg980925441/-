@@ -36,6 +36,8 @@
   mysqld --initialize --console
   ~~~
 
+  dX(sAiW0lk%q
+
 - 4、安装MySQL
 
   ~~~ cmd
@@ -48,17 +50,18 @@
   net start mysql
   ~~~
 
-- 6、登录MySQL
+- 6、登录MySQL  **确保服务真的启动了**
 
   ~~~ cmd
-  mysql -h 主机名 -u 用户名 -p
+  mysql -h localhost -u root -p
   然后输入密码
   ~~~
 
-- 7、设置新密码，**注意分号不能少**
+- 7、设置新密码，**分号加或者不加都试试**
 
   ~~~ cmd
-  set password for root@localhost = password('新密码');  
+  set password for 'root'@'localhost' = password('123456');
+  ALTER USER 'root'@'localhost' IDENTIFIED BY '123456';
   ~~~
 
   然后执行
@@ -77,6 +80,14 @@
   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'password';
   
   flush privileges; 
+  ~~~
+
+  
+  
+- 9、MySQL 8 需要在url后面指定
+
+  ~~~ js
+  ?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT
   ~~~
 
   
