@@ -5,22 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.zanpo.it</groupId>
-    <artifactId>jdbcDemo</artifactId>
+    <artifactId>IODemo</artifactId>
     <version>1.0-SNAPSHOT</version>
-
     <dependencies>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.17</version>
-        </dependency>
-
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-        </dependency>
-
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -28,5 +15,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
 
 </project>
