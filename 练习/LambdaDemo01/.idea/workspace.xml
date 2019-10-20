@@ -2,38 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c5c8734-178c-4116-b594-9396e5b48cc0" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../JDK8Stream/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../JDK8Stream/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../JDK8Stream/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DBHelpper/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../DBHelpper/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../DBHelpper/DBHelpper.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../IODemo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../IODemo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../IODemo/IODemo.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/../JDK8Stream/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../JDK8Stream/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../JDK8Stream/JDK8Stream.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../JDK8Stream/JDK8Stream.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../JDK8Stream/out/production/JDK8Stream/com/zanpo/it/StreamDemo.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../JDK8Stream/src/com/zanpo/it/StreamDemo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/LambdaDemo.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/LambdaDemo/com/zanpo/it/Demo01.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/LambdaDemo/com/zanpo/it/Demo01Inf.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/LambdaDemo/com/zanpo/it/Demo02Inf.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/zanpo/it/Demo01.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/zanpo/it/Demo01Inf.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/com/zanpo/it/Demo02Inf.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/.idea/.name" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/.idea/compiler.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/.idea/workspace.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/pom.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/src/main/java/com/zanpo/it/Main.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/src/main/java/com/zanpo/it/TestController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/src/main/webapp/WEB-INF/web.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/src/main/webapp/index.jsp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/target/classes/application-dev.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/target/classes/application-sit.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/target/classes/application-uat.properties" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/target/classes/com/zanpo/it/Main.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/target/classes/com/zanpo/it/TestController.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../SpringBootProperties/target/classes/config/application.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jdbcDemo/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../jdbcDemo/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../jdbcDemo/jdbcDemo.iml" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -45,27 +21,45 @@
   <component name="CodeInsightWorkspaceSettings">
     <option name="optimizeImportsOnTheFly" value="true" />
   </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="1298117876">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="1" />
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.opened" value="1" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
-        <option name="mavenHome" value="E:/Develop/apache-maven-3.6.0" />
-        <option name="userSettingsFile" value="E:\Develop\apache-maven-3.6.0\conf\settings.xml" />
+        <option name="localRepository" value="/Volumes/Mac附加卷/MavenReps" />
+        <option name="mavenHome" value="/Volumes/Mac附加卷/apache-maven-3.6.0" />
+        <option name="userSettingsFile" value="/Volumes/Mac附加卷/apache-maven-3.6.0/conf/settings.xml" />
       </MavenGeneralSettings>
     </option>
     <option name="importingSettings">
       <MavenImportingSettings>
+        <option name="importAutomatically" value="true" />
         <option name="lookForNested" value="true" />
       </MavenImportingSettings>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="260" />
-    <option name="y" value="20" />
-    <option name="width" value="1400" />
-    <option name="height" value="1000" />
+  <component name="ProjectFrameBounds">
+    <option name="y" value="23" />
+    <option name="width" value="1920" />
+    <option name="height" value="993" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -73,19 +67,21 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
       <pane id="PackagesPane" />
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15332031" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="reference.projectsettings.compiler.javacompiler" />
+    <property name="settings.editor.selected.configurable" value="MavenSettings" />
     <property name="typescript.add.unambiguous.imports.on.the.fly" value="true" />
   </component>
   <component name="RunDashboard">
@@ -111,24 +107,23 @@
       <option name="presentableId" value="Default" />
       <updated>1567175738273</updated>
       <workItem from="1567175739439" duration="26000" />
+      <workItem from="1570886507965" duration="46000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="26000" />
+    <option name="totallyTimeSpent" value="72000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="0" y="23" width="1920" height="993" extended-state="6" />
     <layout>
-      <window_info id="Designer" />
-      <window_info id="UI Designer" />
-      <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info id="Image Layers" />
+      <window_info id="Capture Tool" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25239617" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info anchor="bottom" id="Database Changes" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info anchor="bottom" id="Terminal" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info id="Designer" order="2" />
+      <window_info id="UI Designer" order="3" />
+      <window_info id="Favorites" order="4" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -136,18 +131,28 @@
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="right" id="Palette" />
-      <window_info anchor="right" id="BPMNPalette" />
-      <window_info anchor="right" id="Palette&#9;" />
-      <window_info anchor="right" id="Maven" />
-      <window_info anchor="right" id="Database" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Terminal" order="9" />
+      <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
+      <window_info anchor="right" id="Theme Preview" />
+      <window_info anchor="right" id="Capture Analysis" />
+      <window_info anchor="right" id="Maven Projects" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" id="Maven" order="4" />
+      <window_info anchor="right" id="BPMNPalette" order="5" />
+      <window_info anchor="right" id="Database" order="6" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
     </layout>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
   </component>
   <component name="masterDetails">
     <states>
