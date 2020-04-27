@@ -151,8 +151,8 @@ export ARCH_DATA_MODEL=64
 # 允许自动下载依赖
 export ALLOW_DOWNLOADS=true
 # 并行编译的线程数，编译时间长，为了不影响其他工作，我选择为2
-export HOTSPOT_BUILD_JOBS=2
-export ALT_PARALLEL_COMPILE_JOBS=2
+export HOTSPOT_BUILD_JOBS=4
+export ALT_PARALLEL_COMPILE_JOBS=4
 # 是否跳过与先前版本的比较
 export SKIP_COMPARE_IMAGES=true
 # 是否使用预编译头文件，加快编译速度
@@ -186,11 +186,13 @@ unset ALT_ environment
 
 ## 5、开始编译
 
-首先cd到openjdk目录
+首先执行source env.bash
+
+接着cd到openjdk目录
 
 执行bash configure
 
-然后执行make
+然后执行make 
 
 
 
