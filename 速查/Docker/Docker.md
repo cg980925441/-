@@ -74,12 +74,13 @@ docker build -t 镜像名 Dockerfile目录
 
 ~~~shell
 COPY 上下文环境路径 宿主机路径
+# ADD命令会自动下载url文件，解压缩tar包；但是行为未知，官方不推荐使用
 ADD tar包/url 宿主机路径
 ~~~
 
 
 
-ADD命令会自动下载url文件，解压缩tar包；但是行为未知，官方不推荐使用
+
 
 ## 6、安装Docker-Compose
 
