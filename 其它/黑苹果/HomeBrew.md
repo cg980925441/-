@@ -38,10 +38,28 @@ git remote set-url origin https://mirrors.ustc.edu.cn/homebrew-cask.git
 
 
 
+对于bash用户：
+
+```shell
+echo 'export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles' >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+
+
+对于zsh用户
+
+```shell
+echo 'export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.ustc.edu.cn/homebrew-bottles' >> ~/.zshrc
+source ~/.zshrc
+```
+
+
+
 1. brew update更新，加上 -v 参数可以看到当前跑的进度：
 
 ```
-$ brew update -v
+brew update -v
 ```
 
 1. 检测
