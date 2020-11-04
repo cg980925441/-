@@ -1,5 +1,5 @@
 ~~~shell
-ssh-keygen -t rsa -C "980925441@qq.com"
+ssh-keygen -t rsa -C "zanpocc@gmail.com"
 ~~~
 
 
