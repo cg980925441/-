@@ -81,6 +81,11 @@ $name
 #foreach($i in $list)
 	$i
 #end
+
+
+#if($foreach.hasNext)
+  最后一个
+#end
 ~~~
 
 
@@ -120,5 +125,22 @@ foo.vm 文件：
 
 #include(“foo.vm”)
 输出结果为：#set($name =“velocity”)
+~~~
+
+
+
+7、没有的不输出
+
+~~~
+$!{email}
+~~~
+
+
+
+8、注释
+
+~~~
+单行：##
+多行：#* *#
 ~~~
 
