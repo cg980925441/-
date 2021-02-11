@@ -44,6 +44,26 @@ location /hello {
 
 
 
+3、Nginx配置文件中嵌入Lua
+
+~~~nginx
+location /hello {
+    set $target '';
+    access_by_lua '
+        # TODO:从Redis中取出对应上下文根和域名对应的机器
+        local url = "http://www.baidu.com/";
+    	ngx.var.target = url;
+    ';
+
+    # 转发到对应机器上
+    proxy_pass $target;
+}
+~~~
+
+
+
+
+
 tip：lua_code_cache指令关闭缓存，默认是开启，调试时可以开启，每次nginx都会读取配置文件。
 
 tip2：default_type text/html;指定返回值类型。
