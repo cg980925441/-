@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Service  # 表明是 Kubernets Service
+metadata:
+  name: mysql  # Service的名称，全局唯一
+spec:
+  selector:
+    app: mysql  # 符合目标的pod拥有此标签,===1此处应当一致
+  ports:
+    - port: 3306  # Service提供服务的端口号

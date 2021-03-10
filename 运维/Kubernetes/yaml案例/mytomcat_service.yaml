@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service  # 表明是 Kubernets Service
+metadata:
+  name: mytomcat  # Service的名称，全局唯一
+spec:
+  type: NodePort  # 使用Node结点IP+端口的方式暴露给外部调用
+  selector:
+    app: mytomcat  # 符合目标的pod拥有此标签,===1此处应当一致
+  ports:
+    - port: 8080  # Service提供服务的端口号
+      nodePort: 30001 # 暴露给外部的端口，范围在30000-32767
