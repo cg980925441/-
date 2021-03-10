@@ -1,1 +1,0 @@
--javaagent:jetbrains-agent.jar
