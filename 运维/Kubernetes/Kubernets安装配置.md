@@ -324,7 +324,27 @@ kubectl create -f mytomcat_service.yaml
 
 
 
-通过kubectl describe pods和kubectl get svc查看是否创建成功，创建成功后查看pod分配到那台node结点上，通过node结点IP+30001端口即可在本机进行访问。
+通过kubectl describe pods和kubectl get svc查看是否创建成功，创建成功后可以查看pod分配到那台node结点上。
+
+由于我们服务暴露的方式是NodePort，我们可以通过任意node或master的IP地址+30001端口进行访问。
+
+
+
+4、查看RC和service
+
+~~~shell
+kubectl get rc
+kubectl get svc
+~~~
+
+
+
+4、删除RC和service
+
+~~~shell
+kubectl delete rc mytomcat
+kubectl delete service mytomcat
+~~~
 
 
 

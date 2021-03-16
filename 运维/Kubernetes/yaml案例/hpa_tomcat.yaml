@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment  # Deployment
+metadata:
+  name: hpa  # Deployment的名称，全局唯一，这里用我们刚制作的镜像
+spec:
+  replicas: 1   # Pod副本的期待数量
+  selector:
+    matchLabels:    # 注意这里写法和RC的不一样，因为支持多个selector
+      app: hpa  # 符合目标的pod拥有此标签,===1此处应当一致
+  template:     # 根据此模板创建pod的副本
+    metadata:
+      labels:
+        app: hpa  # pod副本拥有的标签,===1此处应当一致
+    spec:
+      containers:        # pod中容器的定义部分
+      - name: hpa   # 容器名称
+        image: 172.16.185.200:5000/hpa:latest  # 容器对应的docker镜像,这里加上我们的本地镜像地址
+        ports:
+          - containerPort: 8080   # 容器应用监听的端口号，tomcat默认的8080
+        resources: 
+          limits: # 最大的CPU和内存
+            cpu: 200m
+            memory: 100Mi
+          requests:  # 需求的内存和CPU
+            cpu: 100m
+            memory: 50Mi
+
+---
+apiVersion: v1
+kind: Service  # 表明是 Kubernets Service
+metadata:
+  name: hpa  # Service的名称，全局唯一
+spec:
+  type: NodePort  # 使用Node结点IP+端口的方式暴露给外部调用
+  selector:
+    app: hpa  # 符合目标的pod拥有此标签,===1此处应当一致
+  ports:
+    - port: 8080  # Service提供服务的端口号
+      nodePort: 30002 # 暴露给外部的端口，范围在30000-32767

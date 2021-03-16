@@ -1,7 +1,7 @@
 # 1、VMware Fussion
 
 ~~~shell
-sudo vi /Library/Preferences/VMware\ Fusion/vmnet8/dhcpd.conf
+sudo vim /Library/Preferences/VMware\ Fusion/vmnet8/dhcpd.conf
 
 # 在下面这行之后添加
 ####### VMNET DHCP Configuration. End of "DO NOT MODIFY SECTION" #######

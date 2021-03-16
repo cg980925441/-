@@ -1,0 +1,4 @@
+FROM tomcat
+WORKDIR "/usr/local/tomcat"
+RUN mv ./webapps.dist/* ./webapps
+COPY ./HPADemo-1.0-SNAPSHOT.war /usr/local/tomcat/webapps

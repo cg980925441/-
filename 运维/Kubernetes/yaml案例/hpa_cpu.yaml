@@ -1,0 +1,14 @@
+apiVersion: autoscaling/v1      # 使用v1版本，仅支持基于CPU使用率的自动扩缩容，v2beta2可支持自定义指标
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa # HorizontalPodAutoscaler的名称，全局唯一
+  namespace: default # 命名空间，不写都为默认
+spec:
+  # HPA的伸缩对象描述，可以是deployment、RC和RS
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: hpa
+  minReplicas: 1  # 最小pod数量
+  maxReplicas: 10 # 最大pod数量
+  targetCPUUtilizationPercentage: 50 # 期待每个pod的CPU使用率都为50%
