@@ -1,16 +1,28 @@
 ~~~shell
-ssh-keygen -t rsa -C "zanpocc@gmail.com"
+# 生成公钥和私钥串
+ssh-keygen -t ed25519 -C "zanpocc@gmail.com"
+
+# 后台执行agent
+eval "$(ssh-agent -s)"
+
+# 新增配置
+vim ~/.ssh/config
+
+# 添加如下内容
+Host *
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile ~/.ssh/id_ed25519
+  
+# 新增key
+ssh-add -K ~/.ssh/id_ed25519
+
+# 拷贝需要放入github的串
+pbcopy < ~/.ssh/id_ed25519.pub
 ~~~
 
 
 
-生成后，找到生成的公钥，复制到GitHub或者GitLab下
 
 
-
-windows在/user/.ssh目录下
-
-mac在/Users/cg/.ssh/id_rsa目录下
-
-
-
+参考网站：https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh
