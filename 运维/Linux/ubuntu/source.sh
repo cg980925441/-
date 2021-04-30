@@ -6,3 +6,4 @@ sed -i "s@http://.*archive.ubuntu.com@http://repo.huaweicloud.com@g" /etc/apt/so
 sed -i "s@http://.*security.ubuntu.com@http://repo.huaweicloud.com@g" /etc/apt/sources.list
 
 # 移除cdrom那行
+vim /etc/apt/sources.list

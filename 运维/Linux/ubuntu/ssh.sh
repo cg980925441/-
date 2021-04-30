@@ -1,7 +1,7 @@
 # 安装
 apt-get install openssh-server
 
-# 改配置(端口)
+# 改配置，主要改：root用户运行远程登录/远程登陆端口修改
 vim /etc/ssh/sshd_config
 
 #重启
