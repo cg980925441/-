@@ -10,8 +10,10 @@ services:
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: 123456
+    # 数据卷
     volumes:
       - mysql-data:/var/lib/mysql
+    # 命令行
     command:
       --default-authentication-plugin=mysql_native_password
       --character-set-server=utf8mb4
@@ -21,8 +23,3 @@ services:
 volumes:
   mysql-data:
 ~~~
-
-
-
-
-
