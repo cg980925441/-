@@ -13,10 +13,7 @@
 ```shell
 docker run -p 3306:3306 \
 --name mysql \
--v /usr/local/docker/mysql/conf:/etc/mysql \
--v /usr/local/docker/mysql/data:/var/lib/mysql \
--v /usr/local/docker/mysql/mysql-files:/var/lib/mysql-files \
--v /usr/local/docker/mysql/logs:/var/log/mysql \
+--mount source=mysql-data,target=/var/lib/mysql \
 -e MYSQL_ROOT_PASSWORD=123456 \
 -d mysql:5.7.22		
 ```
@@ -29,4 +26,8 @@ docker run -p 3326:3306 \
 -e MYSQL_ROOT_PASSWORD=123456 \
 mysql
 ~~~
+
+
+
+docker run -p 3306:3306 --name mysql --mount source=mysql-data,target=/var/lib/mysql -e MYSQL_ROOT_PASSWORD=123456 -d mysql:5.7.22
 
