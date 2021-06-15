@@ -116,5 +116,95 @@ spec:
 
 ## 4、Pod的配置管理
 
+kubernetes1.2提供一种统一的应用配置管理方案：ConfigMap，用法：1、生成环境变量。2、启动参数或程序使用环境变量。3、
+
+
+
+### 1、创建ConfigMap
+
+#### 1、YAML配置文件创建
+
+~~~yaml
+apiVersion: v1
+kind: ConfigMap  # ConfigMap
+metadata:
+  name: app-vars  # ConfigMap的名称，全局唯一
+data:
+  apploglevel: info
+  appdatadir: /var/data
+~~~
+
+
+
+可以将配置文件的内容作为data中的value
+
+
+
+#### 2、通过命令行创建
+
+~~~shell
+# 从目录中进行创建，文件名作为key，文件内容作为value
+kubectl create configmap ConfigMap名称 --from-file=目录
+~~~
+
+
+
+### 2、在Pod中使用ConfigMap
+
+#### 1、通过环境变量进行使用
+
+1、通过环境变量
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-use-configmap
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - env | grep APP;
+      env: 
+        - name: APPLOGLEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: app-vars # ConfiMap的名称
+              key: apploglevel # ConfigMap中Key的名称
+  restartPolicy: Never # 执行完毕后退出，不重启，默认时Always
+~~~
+
+
+
+2、1.6之后的新字段envFrom将ConfigMap中所有定义的key=value自动生成环境变量
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-use-configmap
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - env;
+      envFrom: 
+        - configMapRef:
+            name: app-vars # ConfiMap的名称
+  restartPolicy: Never # 执行完毕后退出，不重启，默认时Always
+~~~
+
+
+
+#### 2、通过volumeMount使用ConfigMap
+
 
 
