@@ -116,7 +116,7 @@ spec:
 
 ## 4、Pod的配置管理
 
-kubernetes1.2提供一种统一的应用配置管理方案：ConfigMap，用法：1、生成环境变量。2、启动参数或程序使用环境变量。3、
+kubernetes1.2提供一种统一的应用配置管理方案：ConfigMap。注意是通过环境变量注入到容器，而且可以实现将node上的文件变为配置，配置然后挂载成容器中的文件。
 
 
 
@@ -206,5 +206,202 @@ spec:
 
 #### 2、通过volumeMount使用ConfigMap
 
+通过将ConfigMap中的key作为文件名，value作为文件内容挂载到容器中。
+
+1、指定挂载configmap中的某一些配置
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-use-configmap
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - ls /configfiles && cat /configfiles/apploglevel.txt && cat /configfiles/appdatadir.log;
+      volumeMounts:
+        - name: testvolumes	# 卷名称
+          mountPath: /configfiles # 挂载到容器中的目录
+  volumes:
+    - name: testvolumes
+      configMap:
+        name: app-vars # 挂载的configmap名称
+        items: # configmap中的那些项将被挂载
+          - key: apploglevel # configmap中的key
+            path: apploglevel.txt # 文件名
+          - key: appdatadir # configmap中的key
+            path: appdatadir.log # 文件名
+  restartPolicy: Never # 执行完毕后退出，不重启，默认时Always
+~~~
 
 
+
+2、挂载configmap中的所有配置
+
+此时无法指定文件名了，只能以key作为文件名。
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-use-configmap
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - ls /configfiles && cat /configfiles/apploglevel.txt && cat /configfiles/appdatadir.log;
+      volumeMounts:
+        - name: testvolumes	# 卷名称
+          mountPath: /configfiles # 挂载到容器中的目录
+  volumes:
+    - name: testvolumes
+      configMap:
+        name: app-vars # 挂载的configmap名称
+  restartPolicy: Never # 执行完毕后退出，不重启，默认时Always
+~~~
+
+
+
+#### 3、ConfigMap的限制
+
+1、必须在Pod前创建
+
+2、受namespace限制
+
+3、静态Pod无法使用
+
+4、文件挂载时，会覆盖容器内原本的文件
+
+
+
+## 5、容器内获取Pod信息
+
+主要是通过Downward API进行注入，两种方式：1、环境变量  2、文件挂载
+
+#### 1、Pod信息
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-get-pod-info
+  labels:
+    a: a
+    b: b
+    c: c
+  annotations:
+    build: two
+    builder: jhn-doe
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - env | grep POD_NAME && ls /configfiles && cat /configfiles/labels && cat /configfiles/annotations
+      env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+      volumeMounts:
+        - name: podinfo
+          mountPath: /configfiles
+          readOnly: false
+  volumes:
+    - name: podinfo
+      downwardAPI:
+        items:
+          - path: "labels"
+            fieldRef:
+              fieldPath: metadata.labels
+          - path: "annotations"
+            fieldRef:
+              fieldPath: metadata.annotations
+  restartPolicy: Never # 执行完毕后退出，不重启，默认时Always
+~~~
+
+
+
+Downward API提供的变量有:
+
+- metadata.name
+- status.podIP
+- metadata.namespace
+- metadata.labels
+- metadata.annotations
+
+
+
+#### 2、容器资源信息
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-get-pod-resource-info
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - env | grep MY_
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "125m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+      env:
+        - name: MY_REQUEST_CPU
+          valueFrom:
+            resourceFieldRef:
+              containerName: ubuntu-curl
+              resource: requests.cpu
+        - name: MY_LIMITS_CPU
+          valueFrom:
+            resourceFieldRef:
+              containerName: ubuntu-curl
+              resource: limits.cpu
+        - name: MY_REQUEST_MEMORY
+          valueFrom:
+            resourceFieldRef:
+              containerName: ubuntu-curl
+              resource: requests.memory
+        - name: MY_LIMITS_MEMORY
+          valueFrom:
+            resourceFieldRef:
+              containerName: ubuntu-curl
+              resource: limits.memory
+  restartPolicy: Never # 执行完毕后退出，不重启，默认时Always
+~~~
+
+Downward API提供的变量有:
+
+- requests.cpu
+- limits.cpu
+- requests.memory
+- limits.memory
+- limits.ephemeral-storage
+- requests.ephemeral-storage
+
+
+
+#### 3、作用
+
+某些程序启动时，可能需要自身的某些信息（自身标示或者IP）然后注册到服务注册中心的地方，这时可以使用启动脚本将注入的POD信息写到配置文件中，然后启动程序。
