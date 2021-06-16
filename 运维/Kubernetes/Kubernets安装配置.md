@@ -11,11 +11,14 @@ hostname master
 vim /etc/hostname
 
 # 也可以在k8s配置文件中指定，简单起见，先设置主机名为master和node1、node2
+
+# 此外还需要在hosts文件中修改下主机名
+127.0.0.1 master
 ~~~
 
 
 
-## 1、添加kubernetes下载源
+## 1、添加kubernetes下载源 
 
 ~~~shell
 # 添加内容：deb 镜像源 kubernetes-xenial main
@@ -37,12 +40,15 @@ echo "deb https://mirrors.tuna.tsinghua.edu.cn/kubernetes/apt/ kubernetes-xenial
 
 
 
-
-
 ## 2、添加**kubernetes**的**key**
 
 ~~~shell
-curl -s https://repo.huaweicloud.com/kubernetes/apt/doc/apt-key.gpg | sudo apt-key add -
+# 谷歌官方的
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+# 阿里云镜像
+curl -s https://mirrors.aliyun.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -
+# 华为云镜像
+curl -s https://repo.huaweicloud.com/kubernetes/apt/doc/apt-key.gpg | apt-key add -
 ~~~
 
 
@@ -53,7 +59,7 @@ curl -s https://repo.huaweicloud.com/kubernetes/apt/doc/apt-key.gpg | sudo apt-k
 # 由于添加了新源，先更新索引
 sudo apt update
 # 安装adm、let和ctl，貌似也不太稳定，可能会失败，多安装几次
-sudo apt install -y kubeadm kubelet kubectl
+sudo apt install -y kubeadm=1.20.0-00 kubelet=1.20.0-00 kubectl=1.20.0-00
 ~~~
 
 
@@ -119,9 +125,9 @@ dns:
 etcd:
   local:
     dataDir: /var/lib/etcd
-imageRepository: registry.aliyuncs.com/google_containers
+imageRepository: registry.aliyuncs.com/google_containers # 镜像仓库
 kind: ClusterConfiguration
-kubernetesVersion: v1.20.0
+kubernetesVersion: v1.20.0 # 版本
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
