@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-get-pod-resource-info
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - echo ok > /tmp/health; sleep 10; rm -rf /tmp/health; sleep 600;
+      livenessProbe: # 执行cat /tmp/health命令,如果后面文件不存在时cat命令返回code是0，可以通过执行命令后执行echo $?查看
+        exec:
+          command:
+            - cat
+            - /tmp/health
+          initialDelaySeconds: 15 # 延迟15s后执行
+          timeoutSeconds: 1 # 响应超时时间
+  restartPolicy: Never 

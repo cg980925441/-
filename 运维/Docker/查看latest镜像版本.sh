@@ -1,0 +1,1 @@
+docker image inspect mysql:latest|grep -i version

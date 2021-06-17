@@ -405,3 +405,151 @@ Downward API提供的变量有:
 #### 3、作用
 
 某些程序启动时，可能需要自身的某些信息（自身标示或者IP）然后注册到服务注册中心的地方，这时可以使用启动脚本将注入的POD信息写到配置文件中，然后启动程序。
+
+
+
+## 6、Pod生命周期和重启策略
+
+### 1、生命周期
+
+| 状态               | 描述                                                         |
+| ------------------ | ------------------------------------------------------------ |
+| pending            | API Server已经创建该Pod，但是Pod中还有容器没有创建，包括镜像下载的过程 |
+| Running            | Pod内所有容器都已经创建，容器处于运行、正在启动、正在重启状态 |
+| Complete/Succeeded | Pod中所有容器都已经成功执行并且退出，且不会再重启            |
+| Failed             | Pod中所有容器都已退出，但有容器的退出状态为失败（exitcode非0） |
+| Unknown            | 网络不通，无法获取状态                                       |
+
+
+
+### 2、重启策略
+
+yaml文件中restartPolicy的取值：
+
+- Always：容器失效时，kubelet自动重启该容器
+- OnFailure：容器终止且退出code不为0时，由kubelet自动重启该容器
+- Never：无论容器运行状态如何，kubelet都不会重启该容器
+
+
+
+重启的时间：sync-frequency*2n，最长延迟5分钟，并且在成功重启后的10分钟后重置改时间。
+
+总结：需要长时间运行的程序设置为Always，只需要执行一次的程序设置为Never或者OnFailure
+
+
+
+## 7、Pod健康检查和服务可用性检查
+
+Kubernetes提供三种方式进行Pod中容器的健康检查，健康检查不通过时会依据配置的重启策略进行重启。
+
+1、在容器中执行命令
+
+2、TCP连接测试
+
+3、HTTP请求测试
+
+
+
+TCP和HTTP方式即使失败，退出码也是0，所以配置为Never的情况下，失败会变成Complete
+
+
+
+### 1、执行命令
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-liveness-cmd
+spec:
+  containers:
+    - name: ubuntu-curl
+      image: nanda/ubuntu-curl:v1
+      command: 
+        - sh
+        - -c
+      args:
+        - echo ok > /tmp/health; sleep 10; rm -rf /tmp/health; sleep 600;
+      livenessProbe: # 执行cat /tmp/health命令,如果后面文件不存在时cat命令返回code是0，可以通过执行命令后执行echo $?查看
+        exec:
+          command:
+            - cat
+            - /tmp/health
+        initialDelaySeconds: 15 # 延迟15s后执行
+        timeoutSeconds: 1 # 响应超时时间
+  restartPolicy: Never 
+~~~
+
+
+
+这里会一直重启该Pod，这个Pod执行会一直失败.
+
+
+
+### 2、TCP
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-liveness-tcp
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      livenessProbe: # 与本地的8080端口建立连接，没有开启这个端口，所以容器健康检查会失败，容器退出
+        tcpSocket:
+          port: 8080
+        initialDelaySeconds: 30 # 延迟30s后执行
+        timeoutSeconds: 1 # 响应超时时间
+  restartPolicy: Never 
+~~~
+
+
+
+
+
+### 3、HTTP
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-liveness-http
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      livenessProbe: # 访问localhost:80/_status/healthz,nginx没有，所以会404，健康检查失败容器退出
+        httpGet:
+          path: /_status/healthz
+          port: 80
+        initialDelaySeconds: 30 # 延迟30s后执行
+        timeoutSeconds: 1 # 响应超时时间
+  restartPolicy: Never 
+~~~
+
+
+
+
+
+## 8、Pod调度
+
+我们的Pod可能根据不同的情况需要被调度到不同的Node上，主要有以下几种情况：
+
+1、web应用，不限定node
+
+2、数据库类Pod部署到ssd的node上
+
+3、某两个pod不能部署到同一个node上或者某 两个pod必须部署到同一个node上（共用网络和数据卷）
+
+4、zk、es、mongo、kafka，必须部署到不同的node上，恢复后需要挂载原来的volume，复杂
+
+5、日志采集、性能采集每个node上都需要有且部署一个
+
+6、
+
