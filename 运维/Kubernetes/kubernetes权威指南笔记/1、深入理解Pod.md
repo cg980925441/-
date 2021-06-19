@@ -539,7 +539,11 @@ spec:
 
 ## 8、Pod调度
 
-我们的Pod可能根据不同的情况需要被调度到不同的Node上，主要有以下几种情况：
+> https://kubernetes.io/zh/docs/concepts/scheduling-eviction/
+
+
+
+我们的Pod可能根据不同的情况需要被调度到不同的Node上，可能存在以下几种情况：
 
 1、web应用，不限定node
 
@@ -551,5 +555,477 @@ spec:
 
 5、日志采集、性能采集每个node上都需要有且部署一个
 
-6、
+
+
+### 1、全自动调度：Deployment
+
+Deployment可以控制指定Pod的数量，且可以实现全自动调度。
+
+Deployment也是依据ReplicaSet来进行管理Pod的，所以我们创建一个Deployment的时候也会创建一个ReplicaSet对象。
+
+
+
+1、部署三个Nginx Pod
+
+~~~yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx-deployment
+  template:
+    metadata:
+      labels:
+        app: nginx-deployment
+    spec:
+      containers:
+      - name: nginx-deployment
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 80
+~~~
+
+
+
+2、两个版本的nginx，共三个，TODO
+
+
+
+### 2、定向调度
+
+> https://kubernetes.io/zh/docs/concepts/scheduling-eviction/assign-pod-node/
+
+
+
+将Pod调度到指定的node上
+
+#### 1、给node打上标签
+
+有两种方式打标签，命令行和文件的方式，都是在master结点上进行。
+
+1、命令行
+
+~~~shell
+kubectl label nodes <node-name> <label-key>=<label-value>
+~~~
+
+
+
+例如，给node1结点打上disk=ssd的标签
+
+~~~shell
+kubectl label nodes node1 disk=ssd
+~~~
+
+
+
+tips：
+
+**查看每个node上的labels**
+
+~~~shell
+kubectl get nodes --show-labels
+~~~
+
+通过查看，我们可以知道每个node的一些基本信息：操作系统、系统架构、主机名等信息都已经默认作为label标记在node上了。
+
+
+
+**删除指定node上的label**
+
+~~~shell
+kubectl label nodes node1 disk-
+~~~
+
+
+
+**修改指定node上label值**
+
+没有就会新建，相当于save=create or update
+
+~~~shell
+kubectl label nodes node1 disk=ssd --overwrite
+~~~
+
+
+
+#### 2、将Pod调度到指定node
+
+~~~yaml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-master
+spec:
+  replicas: 1
+  selector:
+    app: redis-master
+  template:
+    metadata:
+      name: redis-master
+      labels:
+        app: redis-master
+    spec:
+      containers:
+        - name: redis-master
+          image: redis  
+          ports:
+            - containerPort: 6379
+      nodeSelector:
+        disk: ssd	# 将该rc控制的pod调度到打了disk=ssd的node上，标签不存在或者没有可用的node时就会调度失败
+~~~
+
+
+
+然后查看pod的情况，即可看到pod已经调度到了指定的node上了
+
+~~~shell
+kubectl get pods -o wide
+~~~
+
+
+
+#### 3、注意点
+
+- 如果指定的标签多个node有，则由schedule自动选择一个可用节点进行调度
+- 如果指定标签的node没有或者不存在，则调度会失败，pod的状态会一直处于Pending的状态
+- 属于一种比较强硬的限制调度的手段
+
+
+
+### 3、Node亲和性调度
+
+ 上面的定向调度nodeselector属于一种硬限制，而且只能将Pods调度到指定的Nodes上。
+
+NodeAffinity调度属于升级版，既可以支持硬限制，也可以支持软限制：优先级、顺序、权重。
+
+**IgnoreDuringExecution:如果在Pod运行期间标签发生了变更，不再符合Pod的亲和性需求，系统将会忽略该变化，Pod能继续在该节点运行**
+
+分为：
+
+1、RequiredDuringSchedulingIgnoreDuringExecution：硬限制
+
+对于定向调度的，我们可以这样写，也是一样的效果
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scheduling-soft
+  labels:
+    name: scheduling-soft
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: disk
+              operator: In
+              values: 
+                - ssd1
+  containers:
+  - name: scheduling-soft
+    image: redis
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    ports:
+      - containerPort: 6379
+~~~
+
+
+
+2、PreferredDuringSchedulingignoredDuringExecution：软限制
+
+例如上面的例子，如果disk=ssd标签的node不存在或者不可用，定向调度就会失败，我们使用软限制就可以让其退而求其次在其他node上进行调度：
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: scheduling-soft
+  labels:
+    name: scheduling-soft
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: beta.kubernetes.io/arch
+              operator: In
+              values: 
+                - amd64
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: disk
+                operator: In
+                values: 
+                  - ssd1
+  containers:
+  - name: scheduling-soft
+    image: redis
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    ports:
+      - containerPort: 6379
+~~~
+
+此时，我们的node上都没有disk=ssd1这个标签，但是还是能正常调度到其它node上。
+
+
+
+Note:operator操作包括：In、NotIn、Exists、DoesNotExist、Gt、Lt
+
+
+
+#### 1、注意点
+
+- 定向调度nodeSelector和亲和性调度nodeAffinity同时存在时，必须两个都满足才能正常调度。是"and与"的关系。
+- 亲和性调度的硬限制，nodeSelectorTerms之间是"or或"的关系，而matchExpressions是"and与"的关系。
+
+
+
+#### 2、调度到指定的node
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+  nodeName: node1
+~~~
+
+
+
+
+
+### 4、Pod亲和和互斥调度
+
+该功能1.4引入，前面的定向调度和node亲和性调度是站在node的角度上来对pod进行调度，但是我们有些需求是做pod之间的亲和和互斥，例如前端工程pod和后端工程pod部署在同一node上，mysql不能和redis部署在同一node上。
+
+这时我们就可以使用Pod亲和和互斥调度
+
+
+
+#### 1、亲和性
+
+1、首先创建一个参考模板Pod
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80
+~~~
+
+
+
+2、创建一个带有亲和性规则的Pod
+
+其实Pod的亲和性调度还是依赖Pod上的标签，从需要指定topologyKey属性就可以看出来，亲和性规则：
+
+**在具有标签X的Node上运行了一个或者多个符合条件Y的Pod，那么该Pod应该允许在这个Node上**
+
+这里有两个条件：1、标签X的node  2、符合条件Y的Pod
+
+
+
+但是我们可以推广第一个条件为全部的node，此时我们可以设置这个标签为每个node都有的默认的标签，例如：kubernetes.io/hostname
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-affinity
+  labels:
+    name: pod-affinity
+spec:
+  containers:
+  - name: pod-affinity
+    image: tomcat
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    ports:
+      - containerPort: 8080
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: name
+              operator: In
+              values: 
+                - nginx
+          topologyKey: kubernetes.io/hostname
+~~~
+
+
+
+此时我们再查看node就会发现，两个pod就调度到同一个node节点上了。
+
+
+
+#### 2、互斥性
+
+
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-affinity-mutex
+  labels:
+    name: pod-affinity-mutex
+spec:
+  containers:
+  - name: pod-affinity-mutex
+    image: tomcat
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    ports:
+      - containerPort: 8080
+  affinity:
+    podAntAffinity: # 互斥
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: name
+              operator: In
+              values: 
+                - nginx
+          topologyKey: kubernetes.io/hostname
+~~~
+
+
+
+### 5、污点Taints和容忍Tolerations
+
+> https://kubernetes.io/zh/docs/concepts/scheduling-eviction/taint-and-toleration/
+
+
+
+前面的调度是让Pod调度到node节点上，而Taints是让node拒绝Pod的运行。
+
+Taints是node的属性，Tolerations是Pod的属性，node有taints，除非Pod明确表明能够容忍node的Taints，否则无法Pod无法调度或者运行在指定的node上。
+
+
+
+#### 1、设置Taints
+
+1、禁止再将Pod调度到该node
+
+~~~shell
+# 给node1添加一个键为key，值为value，效果为NoSchedule的taints。
+kubectl taint nodes node1 key=value:NoSchedule
+
+# 删除,后面加个减号
+kubectl taint nodes node1 key=value:NoSchedule-
+
+# 查看node的所有Taints
+kubectl describe node node2 | grep Taints
+~~~
+
+
+
+效果：
+
+| effect           | 描述                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| NoSchedule       | 没有指定Tolerations的Pod不会被调度到该node                   |
+| PreferNoSchedule | 没有指定Tolerations的Pod不会被优先调度到该node               |
+| NoExecute        | 没有指定Tolerations的Pod会被立即驱逐，指定tolerationSeconds后会在指定时间后被驱逐 |
+
+
+
+
+
+#### 2、设置Tolerations
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    env: test
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+    imagePullPolicy: IfNotPresent
+  tolerations:
+  - key: "key"
+    operator: "Exists"
+    effect: "NoSchedule"
+~~~
+
+
+
+operator的取值：Equal、Exist
+
+effect的取值：NoSchedule、PreferNoSchedule（尽量避免调度，非强制）、NoExecute
+
+
+
+operator一些规则：
+
+- operator的值是Exists，则无需指定value
+- operator的值是Equal并且value相等
+
+
+
+使用场景：
+
+1、部分node只给指定应用用，在node添加NoSchedule的taints，然后只在指定Pod上设置tolerations
+
+2、node故障时，通过给node添加taints驱逐node上的pods
+
+3、kubernetes的node有问题或者网络有问题时，会自动给node添加内置的taint使之无法调度到该节点
+
+
+
+### 6、Pod优先级调度
+
+> https://kubernetes.io/zh/docs/concepts/scheduling-eviction/pod-priority-preemption/
+
+
+
+
+
+
 

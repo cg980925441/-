@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-affinity
+  labels:
+    name: pod-affinity
+spec:
+  containers:
+  - name: pod-affinity
+    image: tomcat
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "250m"
+    ports:
+      - containerPort: 8080
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: name
+              operator: In
+              values: 
+                - nginx
+          topologyKey: kubernetes.io/hostname
