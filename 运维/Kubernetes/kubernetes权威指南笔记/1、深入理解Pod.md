@@ -1025,7 +1025,103 @@ operator一些规则：
 
 
 
+#### 1、创建PriorityClasses
+
+~~~yaml
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: high-priority
+value: 1000000 # 超过一亿被系统保留，给系统组件使用
+globalDefault: false
+description: "description priority"
+~~~
 
 
 
+> scheduling.k8s.io/v1beta1 PriorityClass is deprecated in v1.14+, unavailable in v1.22+; use scheduling.k8s.io/v1 PriorityClass
+
+1.22中PriorityClass就成了正式版了
+
+
+
+#### 2、指定Pod的优先级
+
+集群情况：两个node，每个node一个CPU，2G内存
+
+先部署两个redis，每个使用半个CPU，将所有资源占满，再部署一个高优先级的使用半个CPU的tomcat，此时tomcat调度时就会驱逐掉一个redis
+
+~~~yaml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-master
+spec:
+  replicas: 2
+  selector:
+    app: redis-master
+  template:
+    metadata:
+      name: redis-master
+      labels:
+        app: redis-master
+    spec:
+      containers:
+        - name: redis-master
+          image: redis  
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+~~~
+
+
+
+~~~yaml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: tomcat
+spec:
+  replicas: 1
+  selector:
+    app: tomcat
+  template:
+    metadata:
+      name: tomcat
+      labels:
+        app: tomcat
+    spec:
+      containers:
+        - name: tomcat
+          image: tomcat  
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+      priorityClassName: high-priority
+~~~
+
+
+
+
+
+#### 3、缺点
+
+- 复杂性增加
+- 可能带来不稳定因素
+- 资源紧张应该考虑扩容
+- 如果非要使用，可以考虑有监管的优先级调度
+
+
+
+
+
+### 7、DaemonSet每个Node上部署一个Pod
+
+需求
 
