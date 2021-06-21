@@ -679,8 +679,9 @@ spec:
           image: redis  
           ports:
             - containerPort: 6379
+      # 将该rc控制的pod调度到打了disk=ssd的node上，标签不存在或者没有可用的node时就会调度失败
       nodeSelector:
-        disk: ssd	# 将该rc控制的pod调度到打了disk=ssd的node上，标签不存在或者没有可用的node时就会调度失败
+        disk: ssd	
 ~~~
 
 
@@ -920,7 +921,8 @@ spec:
     ports:
       - containerPort: 8080
   affinity:
-    podAntAffinity: # 互斥
+    # 互斥
+    podAntAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         - labelSelector:
             matchExpressions:
@@ -966,7 +968,7 @@ kubectl describe node node2 | grep Taints
 
 | effect           | 描述                                                         |
 | ---------------- | ------------------------------------------------------------ |
-| NoSchedule       | 没有指定Tolerations的Pod不会被调度到该node                   |
+| NoSchedule       | 没有指定Tolerations的Pod不会被调度到该node，master节点配置了这个属性，key为node-role.kubernetes.io/master |
 | PreferNoSchedule | 没有指定Tolerations的Pod不会被优先调度到该node               |
 | NoExecute        | 没有指定Tolerations的Pod会被立即驱逐，指定tolerationSeconds后会在指定时间后被驱逐 |
 
@@ -1032,7 +1034,8 @@ apiVersion: scheduling.k8s.io/v1
 kind: PriorityClass
 metadata:
   name: high-priority
-value: 1000000 # 超过一亿被系统保留，给系统组件使用
+# 超过一亿被系统保留，给系统组件使用
+value: 1000000
 globalDefault: false
 description: "description priority"
 ~~~
@@ -1123,5 +1126,294 @@ spec:
 
 ### 7、DaemonSet每个Node上部署一个Pod
 
-需求
+> https://kubernetes.io/zh/docs/concepts/workloads/controllers/daemonset/
+
+
+
+需求:
+
+- 每个Node上都运行一个日志采集程序，例如：Logstach
+- 每个Node上都运行一个性能监控程序，例如：Prometheus Node Exporter
+- 每个Node上都运行一个GlusterFS存储或者Ceph存储的Daemon进程
+
+使用：
+
+~~~yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-elasticsearch
+  # 滚动升级
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        name: fluentd-elasticsearch
+    spec:
+      tolerations:
+      # this toleration is to have the daemonset runnable on master nodes
+      # remove it if your masters can't run pods
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      containers:
+      - name: fluentd-elasticsearch
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+~~~
+
+
+
+此时，包括master也会部署一个node。
+
+1.6版本后，DaemonSet也能进行滚动升级。
+
+
+
+#### 1、删除
+
+删除掉DaemonSet，默认不会删除每个node上的Pod，添加--cascade=false命令，将会一起删除每个node上的Pod。
+
+
+
+#### 2、在部分节点上部署
+
+通过使用nodeSelect进行过滤，参考Pod亲和性和互斥
+
+
+
+
+
+### 8、Job批处理调度
+
+> https://kubernetes.io/zh/docs/concepts/workloads/controllers/job/
+
+
+
+基本格式:
+
+~~~yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  completions: 8 # Pod的执行次数
+  parallelism: 2 # Pod的并行个数
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4 # 重试次数
+~~~
+
+
+
+三种使用方式：
+
+1、一个任务创建一个Job，一个Job执行一个Pod
+
+2、多个任务创建一个Job（使用Redis队列），一个Job执行多个Pod，N个任务N个Job
+
+3、多个任务创建一个Job（使用Redis队列），一个Job执行多个Pod，N个任务M个Job
+
+
+
+
+
+### 9、Cronjob定时任务
+
+> https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+
+
+
+~~~yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure
+~~~
+
+
+
+CronJob类型apiVersion在1.18中是batch/v1beta1，书籍和官方最新文档是v1，没搞懂是什么情况。TODO
+
+创建CronJob之后，每隔一分钟就会创建一个Pod执行一次。
+
+
+
+#### 1、CRON语法
+
+```
+# ┌───────────── minute (0 - 59)
+# │ ┌───────────── hour (0 - 23)
+# │ │ ┌───────────── day of the month (1 - 31)
+# │ │ │ ┌───────────── month (1 - 12)
+# │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday;
+# │ │ │ │ │                                   7 is also Sunday on some systems)
+# │ │ │ │ │
+# │ │ │ │ │
+# * * * * *
+```
+
+| Entry                  | Description                                                | Equivalent to |
+| ---------------------- | ---------------------------------------------------------- | ------------- |
+| @yearly (or @annually) | Run once a year at midnight of 1 January                   | 0 0 1 1 *     |
+| @monthly               | Run once a month at midnight of the first day of the month | 0 0 1 * *     |
+| @weekly                | Run once a week at midnight on Sunday morning              | 0 0 * * 0     |
+| @daily (or @midnight)  | Run once a day at midnight                                 | 0 0 * * *     |
+| @hourly                | Run once an hour at the beginning of the hour              | 0 * * * *     |
+
+
+
+*和/的作用：
+
+*：任意值
+
+/：表示从起始时间开始，每隔固定时间触发一次；例如*/1 * * * *表示从现在开始每隔一分钟执行一次
+
+
+
+计算网站：
+
+> https://crontab.guru/
+
+
+
+### 10、自定义调度器
+
+TODO
+
+
+
+## 9、Init Container
+
+> https://kubernetes.io/zh/docs/concepts/workloads/pods/init-containers/
+
+
+
+1.3版本引入，应用启动之前启动一个初始化容器，完成应用启动前的预置条件，例如
+
+- 等待关联组件正确运行（数据库或者后台服务）
+- 基于环境变量和配置模板生成配置文件
+- 从远程数据库获取本地所需配置
+- 下载相关依赖包，或者对系统进行预配置
+
+
+
+例子：初始化Nginx前，为Nginx创建一个Index.html（Nginx镜像没有index.html文件，访问localhost:80会404）
+
+~~~yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    name: nginx
+spec:
+  initContainers:
+    - name: init-nginx-index
+      image: busybox
+      # 将百度主页下载到/work-dir/下
+      command: 
+        - wget 
+        - "-O"
+        - "/work-dir/index.html"
+        - http://www.baidu.com
+      volumeMounts:
+        - name: workdir
+          mountPath: /work-dir
+  containers:
+  - name: nginx
+    image: nginx
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    ports:
+      - containerPort: 80
+    volumeMounts:
+        - name: workdir
+          mountPath: /usr/share/nginx/html
+  volumes:
+    - name: workdir
+      emptyDir: {}
+~~~
+
+
+
+**查看init-container日志**
+
+~~~shell
+kubectl logs nginx -c init-nginx-index
+~~~
+
+
+
+初始化容器与Pod的区别：
+
+- 多个init-container依次按顺序运行
+- 多个init-container都设置了资源限制，取最大值作为所有init-container的资源限制值
+- Pod资源限制在：1、所有容器资源限制之和 2、init-container资源限制值，中取最大值
+- ...
+
+
+
+ 
+
+## 10、Pod的升级和回滚
+
+
+
+## 11、Pod的扩缩容
+
+
+
+## 12、使用StatefulSet搭建MongoDB集群
 
