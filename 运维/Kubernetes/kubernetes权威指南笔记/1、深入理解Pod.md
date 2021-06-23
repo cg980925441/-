@@ -1409,6 +1409,106 @@ kubectl logs nginx -c init-nginx-index
 
 ## 10、Pod的升级和回滚
 
+### 1、滚动升级
+
+新建一个deployment
+
+~~~yaml
+apiVersion: apps/v1
+kind: Deployment  # Deployment
+metadata:
+  name: mynginx  # Deployment的名称，全局唯一
+spec:
+  replicas: 3   # Pod副本的期待数量
+  selector:
+    matchLabels:    # 注意这里写法和RC的不一样，因为支持多个selector
+      app: mynginx  # 符合目标的pod拥有此标签,===1此处应当一致
+  template:     # 根据此模板创建pod的副本
+    metadata:
+      labels:
+        app: mynginx  # pod副本拥有的标签,===1此处应当一致
+    spec:
+      containers:        # pod中容器的定义部分
+      - name: mynginx   # 容器名称
+        image: nginx:1.7.9  # 容器对应的docker镜像
+        ports:
+          - containerPort: 80   # 容器应用监听的端口号
+~~~
+
+
+
+> ~~~shell
+> # 查看滚动升级过程，完成后就只有成功的日志了
+> kubectl rollout status deployment/deployment名称
+> ~~~
+
+
+
+- 修改deployment镜像
+
+~~~shell
+# 格式
+kubectl set image deployment/deployment名称 容器名称=镜像名称:镜像版本
+
+# 例如
+kubectl set image deployment/mynginx mynginx=nginx:1.9.1
+~~~
+
+**此时为滚动升级，先运行一个新的，新的运行起来后，再停止一个旧的；主要通过新建一个RS，然后调整两个RS的数量**
+
+
+
+- 修改deployment的配置
+
+~~~shell
+# 格式
+kubectl edit deployment/deployment名称
+
+# 例如
+kubectl edit deployment/mynginx
+~~~
+
+
+
+#### 1、更新的策略
+
+Deployment的更新由对应yaml文件中的配置指定,下面是默认值
+
+~~~yaml
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+~~~
+
+type有两种取值：recreate（停止所有旧的，再启动新的）和RollingUpdate（默认）
+
+maxSurge：滚动升级过程中，Pod总数超过Pod期望副本数部分的最大值，向上取整
+
+maxUnavailable：滚动升级过程中，可用Pod占Pod总数的百分比，向下取整，也可以是大于零的绝对值。
+
+
+
+#### 2、多重更新
+
+在上一次更新途中，如果又触发一次更新操作，将会终止上一次更新创建的Pod，然后再进行更新
+
+
+
+#### 3、增删改Deployment标签选择器的问题
+
+新增或者修改Deployment的标签选择器时，必须修改Pod上的标签，不然原本的Pod会处于孤立状态，不会被系统自动删除，也不受新的RS控制。
+
+删除Deployment标签选择器，对应的RS和Pod不会受到任何的影响。
+
+
+
+### 2、回滚
+
+
+
 
 
 ## 11、Pod的扩缩容
