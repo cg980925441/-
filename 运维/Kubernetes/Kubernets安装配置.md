@@ -42,6 +42,8 @@ echo "deb https://mirrors.tuna.tsinghua.edu.cn/kubernetes/apt/ kubernetes-xenial
 
 ## 2、添加**kubernetes**的**key**
 
+随便选一个
+
 ~~~shell
 # 谷歌官方的
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -351,6 +353,3 @@ kubectl get svc
 kubectl delete rc mytomcat
 kubectl delete service mytomcat
 ~~~
-
-
-
