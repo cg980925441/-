@@ -901,6 +901,8 @@ spec:
 
 #### 2、互斥性
 
+一个Pod不能和另外一个Pod调度到同一台机器上，可以使用podAntAffinity，指定另外一个Pod的标签。
+
 
 
 ~~~yaml
@@ -932,6 +934,8 @@ spec:
                 - nginx
           topologyKey: kubernetes.io/hostname
 ~~~
+
+
 
 
 
@@ -1209,6 +1213,14 @@ spec:
 通过使用nodeSelect进行过滤，参考Pod亲和性和互斥
 
 
+
+#### 3、滚动升级
+
+> https://kubernetes.io/zh/docs/tasks/manage-daemon/update-daemon-set/
+
+1、yaml文件中进行配置更新策略为滚动升级
+
+2、修改配置后进行apply操作
 
 
 
@@ -1507,13 +1519,66 @@ maxUnavailable：滚动升级过程中，可用Pod占Pod总数的百分比，向
 
 ### 2、回滚
 
+#### 1、查看历史版本
 
 
 
+~~~shell
+# 查看Depolyment的历史
+kubectl rollout history deployment/mynginx
 
-## 11、Pod的扩缩容
+# 查看指定版本Depolyment的详情信息
+kubectl rollout history deployment/mynginx --revision=4
+
+# ⚠️⚠️⚠️只有更新Deployment时加上--record=true时才会记录该条历史
+kubectl set image deployment/mynginx mynginx=nginx:1.9.1 --record=true
+~~~
 
 
 
-## 12、使用StatefulSet搭建MongoDB集群
+#### 2、回滚到指定版本
+
+~~~shell
+# 回滚到上一个版本
+kubectl rollout undo deployment/mynginx
+
+# 回滚到指定版本
+kubectl rollout undo deployment/mynginx --to-revision=3
+~~~
+
+
+
+#### 3、暂停和恢复Deployment的部署操作
+
+~~~shell
+# 暂停Deployment的更新，暂停后对deployment的更新不会触发操作，只有恢复后才会进行
+kubectl rollout pause deployment/mynginx
+
+# 恢复Deployment的更新
+kubectl rollout resume deployment/mynginx
+~~~
+
+
+
+暂停和更新有助于我们对Deployment进行复杂的修改
+
+
+
+#### 4、RC的滚动升级
+
+~~~shell
+# 使用一个新的RC代替旧的RC
+kubectl rolling-update old-rc-name -f new-rc.yaml
+
+# 修改旧的RC镜像
+kubectl rolling-update old-rc-name --image=image-name:version
+~~~
+
+
+
+#### 5、DaemonSet滚动升级
+
+1、配置DaemonSet的yaml滚动策略为RollingUpdate（1.6引入）
+
+2、apply旧版本配置文件
 
