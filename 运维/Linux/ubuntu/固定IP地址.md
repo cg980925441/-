@@ -70,3 +70,42 @@ ifup ens33
 
 
 
+
+
+
+
+## 21.04
+
+1、修改配置文件
+
+~~~shell
+cd /etc/netplan/
+~~~
+
+
+
+内容如下：
+
+```yaml
+network:
+    ethernets:
+      网卡名:
+        dhcp4: no
+        addresses: [10.211.55.4/24]
+        optional: true
+        gateway4: 网关,主机虚拟网卡一般是.2,网关是.1
+        nameservers:
+          addresses: [223.5.5.5,223.6.6.6]
+    version: 2
+```
+
+ 
+
+2、应用新配置
+
+~~~shell
+sudo netplan apply
+~~~
+
+
+
