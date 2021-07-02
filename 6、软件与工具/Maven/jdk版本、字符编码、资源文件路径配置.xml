@@ -1,3 +1,5 @@
+<!-- 这些都是告诉Idea用的，便于IDEA导入时能知道各种信息 -->
+
 <properties>
     <!--指定jdk版本-->
     <java.version>1.8</java.version>
@@ -9,3 +11,17 @@
     <!--编译时跳过测试-->
     <skipTests>true</skipTests>
 </properties>
+
+
+<build>
+    <!--指定资源文件路径-->
+    <resources>
+        <resource>
+            <directory>src/main/resources</directory>
+            <includes>
+                <include>**/*.*</include>
+            </includes>
+            <filtering>false</filtering>
+        </resource>
+    </resources>
+</build>
