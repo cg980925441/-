@@ -1,8 +1,11 @@
 # 1、使用kuberadm工具快速安装
 
+> https://kubernetes.io/zh/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
 
 
 ~~~shell
+
 # 修改主机名，避免nodes命令结点只有一个
 # 1、临时修改
 hostname master
@@ -74,6 +77,25 @@ sudo apt install -y kubeadm=1.20.0-00 kubelet=1.20.0-00 kubectl=1.20.0-00
 
 首先基于Kubernetes_Base完整克隆一个虚拟机，内核数设置为2，然后安装：
 
+
+
+### 1、命令行安装（推荐）
+
+~~~shell
+kubeadm init --apiserver-advertise-address=10.211.55.30 \
+--apiserver-bind-port=6443 \
+--image-repository=registry.aliyuncs.com/google_containers \
+--kubernetes-version=v1.20.0 \
+--pod-network-cidr=10.20.0.0/16 \
+--service-cidr=10.30.0.0/16 \
+~~~
+
+
+
+
+
+### 2、配置文件安装
+
 ~~~shell
 # 得到初始化配置文件
 kubeadm config print init-defaults > init.default.yaml
@@ -88,7 +110,7 @@ vim init-config.yaml
 # 安装master,虚拟机核心数得大于1
 # 关闭swap
 sudo swapoff -a
-kubeadm init --config=init-config.yaml
+kubeadm init --config=init-config.yaml --pod-network-cidr=10.100.0.0/16
 ~~~
 
 
@@ -154,7 +176,7 @@ scheduler: {}
 > # 重新安装流程
 > # 重置集群,master和node都能使用该命令进行重制
 > sudo kubeadm reset
-> rm -rf .kube/
+> sudo rm -rf .kube/
 > sudo rm -rf /etc/kubernetes/
 > sudo rm -rf /var/lib/kubelet/
 > sudo rm -rf /var/lib/etcd
@@ -273,6 +295,12 @@ kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl versio
 ~~~
 
 node变成ready了,安装完成，复制几个Node就OK了。
+
+
+
+> 插件位置：/etc/cni/net.d/
+
+
 
 
 
