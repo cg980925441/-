@@ -154,7 +154,8 @@ kind: ClusterConfiguration
 kubernetesVersion: v1.20.0 # 版本
 networking:
   dnsDomain: cluster.local
-  serviceSubnet: 10.96.0.0/12
+  serviceSubnet: 10.96.0.0/16
+  podSubnet: 10.96.10.0/16
 scheduler: {}
 ~~~
 
