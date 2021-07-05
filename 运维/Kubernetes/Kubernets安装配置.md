@@ -79,7 +79,11 @@ sudo apt install -y kubeadm=1.20.0-00 kubelet=1.20.0-00 kubectl=1.20.0-00
 
 
 
-### 1、命令行安装（推荐）
+### 1、命令行安装
+
+> https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm-init/
+
+
 
 ~~~shell
 kubeadm init --apiserver-advertise-address=10.211.55.30 \
@@ -122,18 +126,18 @@ apiVersion: kubeadm.k8s.io/v1beta2
 bootstrapTokens:
 - groups:
   - system:bootstrappers:kubeadm:default-node-token
-  token: 可指定token
-  ttl: 24h0m0s 过期时间，默认24小时
+  token: abcdef.0123456789abcdef # 可指定token
+  ttl: 24h0m0s # 过期时间，默认24小时
   usages:
   - signing
   - authentication
 kind: InitConfiguration
 localAPIEndpoint:
-  advertiseAddress: 改成自己的
+  advertiseAddress: 10.211.55.30 # 改成自己的
   bindPort: 6443
 nodeRegistration:
   criSocket: /var/run/dockershim.sock
-  name: ubuntu
+  name: kubernetes-master
   taints:
   - effect: NoSchedule
     key: node-role.kubernetes.io/master
@@ -154,8 +158,13 @@ kind: ClusterConfiguration
 kubernetesVersion: v1.20.0 # 版本
 networking:
   dnsDomain: cluster.local
-  serviceSubnet: 10.96.0.0/12
+  podSubnet: 10.20.0.0/16 # Pod网段地址
+  serviceSubnet: 10.30.0.0/16 # service网段地址
 scheduler: {}
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs  # kube-proxy 模式，需先安装ipvsadm
 ~~~
 
 具体设置详情见：https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm-init/
@@ -288,17 +297,39 @@ Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 
 执行kubectl get nodes显示notready，因为没有安装CNI网络插件
 
+插件选择：
+
+> https://kubernetes.io/docs/concepts/cluster-administration/networking/
+
+
+
+**删除网络CNI插件：1、delete掉yaml创建k8s对象。2、删除配置/etc/cni/net.d/，重启kubelet服务。**
+
+
+
+### 1、flannel
+
+> https://github.com/flannel-io/flannel#flannel
+
+
+
+~~~shell
+kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+~~~
+
+修改一下配置文件中的网段为Pod的网段，访问类型改为host-gw
+
+
+
+### 2、weave
+
 安装(Master):
 
 ~~~shell
 kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 ~~~
 
-node变成ready了,安装完成，复制几个Node就OK了。
 
-
-
-> 插件位置：/etc/cni/net.d/
 
 
 
@@ -381,3 +412,26 @@ kubectl get svc
 kubectl delete rc mytomcat
 kubectl delete service mytomcat
 ~~~
+
+
+
+## 9、重新安装
+
+1、kubernetes
+
+~~~shell
+# 重新安装流程
+# 重置集群,master和node都能使用该命令进行重制
+sudo kubeadm reset
+sudo rm -rf .kube/
+sudo rm -rf /etc/kubernetes/
+sudo rm -rf /var/lib/kubelet/
+sudo rm -rf /var/lib/etcd
+# 插件目录
+sudo rm -rf /etc/cni/net.d/
+
+
+# 重新安装
+kubeadm init --config=init-config.yaml
+~~~
+
