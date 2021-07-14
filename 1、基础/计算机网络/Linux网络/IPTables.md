@@ -122,3 +122,7 @@ iptables -t nat -A POSTROUTING -s 192.168.45.0/24 -o eth0 -j MASQUERADE
 
 >https://www.cnblogs.com/sammyliu/p/5760125.html
 
+
+
+### 2、追踪网络封包流向
+

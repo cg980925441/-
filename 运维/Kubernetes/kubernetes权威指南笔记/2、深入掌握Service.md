@@ -33,6 +33,7 @@ kind: Service  # 表明是 Kubernets Service
 metadata:
   name: mytomcat  # Service的名称，全局唯一
 spec:
+  sessionAffinity: ClientIP # 默认是轮训，配置后同一个客户端IP请求会被转发到固定Pod上
   type: NodePort  # 使用Node结点IP+端口的方式暴露给外部调用
   selector:
     app: mytomcat  # 符合目标的pod拥有此标签,===1此处应当一致
@@ -49,3 +50,37 @@ spec:
 kubectl expose rc [rc-name]
 ~~~
 
+
+
+### 2、多端口Service
+
+一个容器应用可以暴露多个端口服务，一个Service也能映射多个端口
+
+1、一个Service映射容器多个端口
+
+~~~yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP # 协议
+      port: 80 # Servcice的虚拟端口号
+      targetPort: 9376 # 后端Pod的端口号
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+~~~
+
+
+
+2、一个Service映射同一端口的不同协议
+
+
+
+### 负载策略
+
+默认是轮训（一个IP）

@@ -31,7 +31,7 @@ ip link set [name] up
 # 添加设备到网桥
 brctl addif [bridge-name] [device-name]
 
-# 查看网桥信息
+# 查看所有网桥信息
 brctl show
 
 # 查看网桥上连接的设备信息
@@ -39,6 +39,7 @@ bridge link
 
 # 配置IP
 ip addr add 10.20.30.41/24 dev [veth-name]
+
 ~~~
 
 
@@ -115,5 +116,17 @@ ip link set dev [old-name] name [new-name]
 
 # 启用/禁用网络设备
 ip link set dev [veth-name] up
+~~~
+
+
+
+### 6、查看内核日志
+
+~~~shell
+# 查看内核日志
+dmesg
+
+# 查看并清空缓冲区
+dmesg -c
 ~~~
 

@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ReplicationController  # 副本控制器RC
+metadata:
+  name: nginx  # RC的名称，全局唯一
+spec:
+  replicas: 2   # Pod副本的期待数量
+  selector:
+    app: nginx  # 符合目标的pod拥有此标签,===1此处应当一致
+  template:     # 根据此模板创建pod的副本
+    metadata:
+      labels:
+        app: nginx  # pod副本拥有的标签,===1此处应当一致
+    spec:
+      initContainers:
+        - name: init-nginx-index
+          image: busybox
+          # 将百度主页下载到/work-dir/下
+          command: 
+            - echo 
+            - "this is $(hostname)"
+            - ">"
+            - "/work-dir/index.html"
+          volumeMounts:
+            - name: workdir
+              mountPath: /work-dir
+      containers:
+      - name: nginx
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+          - containerPort: 80
+        volumeMounts:
+            - name: workdir
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: workdir
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service  # 表明是 Kubernets Service
+metadata:
+  name: nginx  # Service的名称，全局唯一
+spec:
+  type: NodePort  # 使用Node结点IP+端口的方式暴露给外部调用
+  selector:
+    app: nginx  # 符合目标的pod拥有此标签,===1此处应当一致
+  ports:
+    - port: 80  # Service提供服务的端口号
+      nodePort: 30001 # 暴露给外部的端口，范围在30000-32767
