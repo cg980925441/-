@@ -12,33 +12,53 @@ Service是Kubernetes中访问应用容器的入口，可以为一组相同功能
 apiVersion: v1
 kind: ReplicationController  # 副本控制器RC
 metadata:
-  name: mytomcat  # RC的名称，全局唯一
+  name: nginx  # RC的名称，全局唯一
 spec:
   replicas: 2   # Pod副本的期待数量
   selector:
-    app: mytomcat  # 符合目标的pod拥有此标签,===1此处应当一致
+    app: nginx  # 符合目标的pod拥有此标签,===1此处应当一致
   template:     # 根据此模板创建pod的副本
     metadata:
       labels:
-        app: mytomcat  # pod副本拥有的标签,===1此处应当一致
+        app: nginx  # pod副本拥有的标签,===1此处应当一致
     spec:
-      containers:        # pod中容器的定义部分
-      - name: mytomcat   # 容器名称
-        image: tomcat  # 容器对应的docker镜像
+      initContainers:
+        - name: init-nginx-index
+          image: busybox
+          # 将百度主页下载到/work-dir/下
+          command:
+            - /bin/sh
+            - -c
+            - 'ls /; echo "this is $(hostname)" > /work-dir/index.html; ls /;'
+          volumeMounts:
+            - name: workdir
+              mountPath: /work-dir
+      containers:
+      - name: nginx
+        image: nginx
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
         ports:
-          - containerPort: 8080   # 容器应用监听的端口号
+          - containerPort: 80
+        volumeMounts:
+            - name: workdir
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: workdir
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service  # 表明是 Kubernets Service
 metadata:
-  name: mytomcat  # Service的名称，全局唯一
+  name: nginx  # Service的名称，全局唯一
 spec:
-  sessionAffinity: ClientIP # 默认是轮训，配置后同一个客户端IP请求会被转发到固定Pod上
   type: NodePort  # 使用Node结点IP+端口的方式暴露给外部调用
   selector:
-    app: mytomcat  # 符合目标的pod拥有此标签,===1此处应当一致
+    app: nginx  # 符合目标的pod拥有此标签,===1此处应当一致
   ports:
-    - port: 8080  # Service提供服务的端口号
+    - port: 80  # Service提供服务的端口号
       nodePort: 30001 # 暴露给外部的端口，范围在30000-32767
 ~~~
 
@@ -56,7 +76,7 @@ kubectl expose rc [rc-name]
 
 一个容器应用可以暴露多个端口服务，一个Service也能映射多个端口
 
-1、一个Service映射容器多个端口
+1、一个Service映射容器多个端口也可以映射不同协议
 
 ~~~yaml
 apiVersion: v1
@@ -77,10 +97,28 @@ spec:
 
 
 
-2、一个Service映射同一端口的不同协议
+2、一个Service映射同一端口的
 
 
 
-### 负载策略
+### 3、负载策略
 
-默认是轮训（一个IP）
+1、默认是轮训（每个IP都是独立的轮训）
+
+2、设置基于IP的会话保持
+
+~~~yaml
+apiVersion: v1
+kind: Service  # 表明是 Kubernets Service
+metadata:
+  name: nginx  # Service的名称，全局唯一
+spec:
+  type: NodePort  # 使用Node结点IP+端口的方式暴露给外部调用
+  selector:
+    app: nginx  # 符合目标的pod拥有此标签,===1此处应当一致
+  ports:
+    - port: 80  # Service提供服务的端口号
+      nodePort: 30001 # 暴露给外部的端口，范围在30000-32767
+  sessionAffinity: ClientIP # 启用sessionAffinity策略，同一IP会被转发到固定的某个Pod上
+~~~
+

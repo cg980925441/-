@@ -1417,6 +1417,12 @@ kubectl logs nginx -c init-nginx-index
 
 
 
+
+
+> https://blog.csdn.net/weixin_30602505/article/details/101435494
+>
+> 写容器启动命令有问题的，看下这篇文章
+
  
 
 ## 10、Pod的升级和回滚

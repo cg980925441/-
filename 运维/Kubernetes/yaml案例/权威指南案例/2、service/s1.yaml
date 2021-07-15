@@ -15,11 +15,10 @@ spec:
         - name: init-nginx-index
           image: busybox
           # 将百度主页下载到/work-dir/下
-          command: 
-            - echo 
-            - "this is $(hostname)"
-            - ">"
-            - "/work-dir/index.html"
+          command:
+            - /bin/sh
+            - -c
+            - 'ls /; echo "this is $(hostname)" > /work-dir/index.html; ls /;'
           volumeMounts:
             - name: workdir
               mountPath: /work-dir
